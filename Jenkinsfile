@@ -1,11 +1,12 @@
 pipeline {
     agent any
-
+    options {
+        skipDefaultCheckout(true)
+    }
     environment {
         DOCKERHUB_CREDENTIALS = credentials('dockerhub-creds')
         IMAGE_NAME = "bayaras009/todo-app"
     }
-
     stages {
         stage('Build Docker Image') {
             steps {
