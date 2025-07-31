@@ -23,20 +23,21 @@ pipeline {
         }
         stage('Update K8s Manifests') {
             steps {
-                withCredentials([usernamePassword(credentialsId: 'github-creds', usernameVariable: 'GIT_USER', passwordVariable: 'GIT_TOKEN')]) {
+                withCredentials([usernamePassword(credentialsId: 'GIT_TOKEN', passwordVariable: 'GIT_PASSWORD', usernameVariable: 'GIT_USERNAME')]) {
                     sh '''
                         git config --global --add safe.directory /var/jenkins_home/workspace/todo-pipeline
-                        sed -i "s|image:.*|image: bayaras009/todo-app:${BUILD_NUMBER}|" ./manifests/deployment.yaml
-                        git config --global user.email "ci@jenkins"
+                        sed -i s|image:.*|image: bayaras009/todo-app:${BUILD_NUMBER}| ./manifests/deployment.yaml
+                        git config --global user.email ci@jenkins
                         git config --global user.name "Jenkins CI"
                         git add ./manifests/deployment.yaml
-                        git diff --staged --quiet || git commit -m "Update deployment image to ${BUILD_NUMBER}"
-                        git pull --rebase https://${GIT_USER}:${GIT_TOKEN}@github.com/mikeeeeeeel/my-todo-pipeline.git main
-                        git push https://${GIT_USER}:${GIT_TOKEN}@github.com/mikeeeeeeel/my-todo-pipeline.git main
+                        git commit -m "Update deployment image to ${BUILD_NUMBER}" || echo "No changes to commit"
+                        git pull --rebase https://${GIT_USERNAME}:${GIT_PASSWORD}@github.com/mikeeeeeeel/my-todo-pipeline.git main
+                        git push https://${GIT_USERNAME}:${GIT_PASSWORD}@github.com/mikeeeeeeel/my-todo-pipeline.git main
                     '''
                 }
             }
         }
+
 
     }
 }
