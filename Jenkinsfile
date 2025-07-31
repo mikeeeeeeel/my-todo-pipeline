@@ -30,7 +30,7 @@ pipeline {
                         git config --global user.email "ci@jenkins"
                         git config --global user.name "Jenkins CI"
                         git add ./manifests/deployment.yaml
-                        git commit -m "Update deployment image to ${BUILD_NUMBER}" || echo "No changes to commit"
+                        git diff --staged --quiet || git commit -m "Update deployment image to ${BUILD_NUMBER}"
                         git pull --rebase https://${GIT_USER}:${GIT_TOKEN}@github.com/mikeeeeeeel/my-todo-pipeline.git main
                         git push https://${GIT_USER}:${GIT_TOKEN}@github.com/mikeeeeeeel/my-todo-pipeline.git main
                     '''
