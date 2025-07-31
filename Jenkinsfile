@@ -12,7 +12,7 @@ pipeline {
             steps {
                 sh """
                 echo $DOCKERHUB_CREDENTIALS_PSW | docker login -u $DOCKERHUB_CREDENTIALS_USR --password-stdin
-                docker build -t $IMAGE_NAME:${BUILD_NUMBER} ./app
+                sh "docker build --no-cache -t bayaras009/todo-app:${BUILD_NUMBER} ./app"
                 """
             }
         }
