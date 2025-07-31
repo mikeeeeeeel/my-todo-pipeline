@@ -21,7 +21,7 @@ def complete(task_id):
         tasks[task_id]["done"] = True
     return redirect(url_for("index"))
 
-@app.route("/delete/<int:task_id")
+@app.route("/delete/<int:task_id>")
 def delete(task_id):
     if 0 <= task_id < len(tasks):
         tasks.pop(task_id)
