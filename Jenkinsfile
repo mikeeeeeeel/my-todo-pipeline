@@ -8,11 +8,16 @@ pipeline {
         IMAGE_NAME = "bayaras009/todo-app"
     }
     stages {
+        stage('Checkout') {
+            steps {
+                checkout scm
+            }
+        }
         stage('Build Docker Image') {
             steps {
                 sh """
-                echo $DOCKERHUB_CREDENTIALS_PSW | docker login -u $DOCKERHUB_CREDENTIALS_USR --password-stdin
-                docker build --no-cache -t bayaras009/todo-app:${BUILD_NUMBER} ./app
+                    echo $DOCKERHUB_CREDENTIALS_PSW | docker login -u $DOCKERHUB_CREDENTIALS_USR --password-stdin
+                    docker build --no-cache -t $IMAGE_NAME:${BUILD_NUMBER} ./app
                 """
             }
         }
@@ -24,19 +29,18 @@ pipeline {
         stage('Update K8s Manifests') {
             steps {
                 withCredentials([usernamePassword(credentialsId: 'github-creds', usernameVariable: 'GIT_USER', passwordVariable: 'GIT_TOKEN')]) {
-                    sh '''
+                    sh """
                         git config --global --add safe.directory /var/jenkins_home/workspace/todo-pipeline
-                        sed -i "s|image:.*|image: bayaras009/todo-app:${BUILD_NUMBER}|" ./manifests/deployment.yaml
+                        sed -i "s|image:.*|image: $IMAGE_NAME:${BUILD_NUMBER}|" ./manifests/deployment.yaml
                         git config --global user.email "ci@jenkins"
                         git config --global user.name "Jenkins CI"
                         git add ./manifests/deployment.yaml
                         git diff --staged --quiet || git commit -m "Update deployment image to ${BUILD_NUMBER}"
                         git pull --rebase https://${GIT_USER}:${GIT_TOKEN}@github.com/mikeeeeeeel/my-todo-pipeline.git main
                         git push https://${GIT_USER}:${GIT_TOKEN}@github.com/mikeeeeeeel/my-todo-pipeline.git main
-                    '''
+                    """
                 }
             }
         }
-
     }
 }
